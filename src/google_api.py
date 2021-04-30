@@ -14,10 +14,7 @@ def label_image(file_name : str) -> str:
     response = client.label_detection(image=image)
     labels = response.label_annotations
 
-    ans = []
-    for i in labels:
-        if i.score > 0.5:
-            ans.append(i.description)
+    ans = [i.description for i in labels if i.score > 0.5]
 
     return '|'.join(ans)
 
