@@ -56,9 +56,10 @@ pub async fn handle_image_upload(mut payload: Multipart, uid: &str) -> Result<Ve
         let img_labels = label_image(img_path.as_str());
 
         let doc = doc! {
-        "img_path": img_path.as_str(),
-        "lables" : img_labels,
-        "uid": uid,
+            "img_path": img_path.as_str(),
+            "lables" : img_labels,
+            "uid": uid,
+            "comments" : doc! {}
         };
 
         coll.insert_one(doc, None).await.unwrap();
