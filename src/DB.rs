@@ -6,6 +6,7 @@ use bson::doc;
 use std::convert::TryInto;
 use std::collections::hash_map::RandomState;
 use bson::oid::ObjectId;
+use std::borrow::Borrow;
 
 pub struct DB {
     client: Client,
@@ -38,6 +39,24 @@ impl DB {
             coll,
             img_data
         }
+    }
+
+    pub fn new_image(&mut self, doc: &bson::Document) -> String {
+        let id : String = self.coll.insert_one(doc.clone(), None).unwrap().inserted_id.as_object_id().unwrap().to_hex();
+        self.img_data.insert(id.clone(),doc.clone());
+        id.clone()
+    }
+
+    pub fn update_label(&mut self, id : String, labels : Vec<String>) {
+        let doc = self.img_data.remove(&id).unwrap();
+        let new_doc = doc! {
+            "title": doc.get("title").unwrap().as_str().unwrap(),
+            "img_path": doc.get("img_path").unwrap().as_str().unwrap(),
+            "comments": doc.get("comments").unwrap().as_document().unwrap(),
+            "labels": labels,
+        };
+        self.img_data.insert(id.clone(),new_doc.clone());
+        self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap()},new_doc,None);
     }
 
 }
