@@ -39,7 +39,7 @@ pub async fn handle_image_upload(mut data: web::Data<Mutex<DB>>, file_data: awmp
 
     let doc = doc! {
         "img_path": filepath.as_str(),
-        "lables" : [],
+        "labels" : [],
         "title": title,
         "comments" : []
     };

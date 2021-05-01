@@ -2,20 +2,25 @@ use actix_web::{get, web, App, HttpServer, Responder, HttpResponse,Result,Error}
 use actix_files::NamedFile;
 use crate::DB::DB;
 use std::sync::Mutex;
-use bson::Document;
+use bson::{Document, Array};
 #[path = "static_html.rs"] mod static_html;
 
 
 #[get("/img/{id}")]
 pub async fn image_view(data: web::Data<Mutex<DB>>,web::Path(id): web::Path<String>) -> HttpResponse {
 
-    match data.get_ref().lock().unwrap().get_image(&id) {
+    match data.lock().unwrap().get_image(&id) {
         None => {HttpResponse::Ok().content_type("text/html; charset=utf-8").body("404")}
         Some(doc) => {
+            println!("{:?}",doc);
             let title = doc.get("title").unwrap().as_str().unwrap();
-            let img_lables = doc.get("labels").unwrap().as_array().unwrap().into_iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>().join(", ");
+            let mut img_lables = doc.get("labels").unwrap().as_array().unwrap().into_iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>().join(", ");
             let img = format!("/get_img/{}",id);
+            if img_lables.is_empty() {
+                img_lables = "In progres...".to_string();
+            }
             let head = static_html::IMAGE_VIEW_HEAD.replace("{Title}",title).replace("{img}",&img).replace("{img_lables}",&img_lables);
+
             let comments_docs = doc.get("comments").unwrap().as_array().unwrap();
             let mut comments: Vec<String> = vec!();
             for i in comments_docs {
