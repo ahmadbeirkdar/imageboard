@@ -15,11 +15,8 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new().wrap(middleware::Logger::default()).data(Mutex::new(DB::DB::init(secret::DB_S)))
-            .service(
-            web::resource("/upload")
-                .route(web::get().to(img_upload_handlers::upload_img))
-                .route(web::post().to(img_upload_handlers::save_file)),
-            )
+            .route("/upload",web::get().to(img_upload_handlers::upload_img))
+            .route("/upload",web::post().to(img_upload_handlers::save_file))
             .route("/img/{id}",web::get().to(img_display::image_view))
             .route("/comment/{id}",web::post().to(img_display::new_comment))
             .route("/",web::get().to(img_display::index))

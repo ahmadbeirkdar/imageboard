@@ -81,4 +81,20 @@ impl DB {
         self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()},new_doc,None)
     }
 
+    pub fn populate(&self) -> HashMap<String,Document>{
+        let mut img_data: HashMap<String,Document> = HashMap::new();
+
+        let cursor = self.coll.find(doc! { }, None).unwrap();
+        for result in cursor {
+            match result {
+                Ok(document) => {
+                    img_data.insert(document.get("_id").unwrap().as_object_id().unwrap().to_hex(), document);
+                }
+                #[allow(unused_variables)]
+                Err(e) => {},
+            }
+        }
+        img_data
+    }
+
 }
