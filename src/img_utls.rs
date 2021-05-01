@@ -41,7 +41,7 @@ pub async fn handle_image_upload(mut data: web::Data<Mutex<DB>>, file_data: awmp
         "img_path": filepath.as_str(),
         "lables" : [],
         "title": title,
-        "comments" : doc! {}
+        "comments" : []
     };
 
     let oid = data.lock().unwrap().new_image(&doc);
