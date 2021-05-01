@@ -1,5 +1,5 @@
 use actix_multipart::{Multipart, Field};
-use actix_web::{HttpResponse, web};
+use actix_web::{HttpResponse, web, Error};
 use futures::{TryStreamExt, StreamExt};
 use std::convert::TryInto;
 use std::mem::swap;
@@ -13,11 +13,19 @@ pub async fn save_file(data: web::Data<Mutex<DB>>,mut parts: awmp::Parts) -> Htt
     let file_data = parts.files.take("file").pop().unwrap();
     let title = String::from(*parts.texts.as_hash_map().get("title").unwrap());
 
-    let response = img_utls::handle_image_upload(data,file_data,title).await.unwrap();
+    match img_utls::handle_image_upload(data,file_data,title).await {
+        Ok(oid) => {
+            HttpResponse::Found()
+                .header("Location", format!("/img/{}",oid))
+                .finish()
+        }
+        Err(_) => {
+            HttpResponse::Ok()
+                .content_type("text/html; charset=utf-8")
+                .body("Error uploading file, try again")
+        }
+    }
 
-    HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
-        .body(response)
 }
 
 pub fn upload_img() -> HttpResponse {
