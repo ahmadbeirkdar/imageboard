@@ -59,4 +59,8 @@ impl DB {
         self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap()},new_doc,None);
     }
 
+    pub fn get_image(&self, id : &str) -> Option<&Document>{
+        self.img_data.get(id)
+    }
+
 }
