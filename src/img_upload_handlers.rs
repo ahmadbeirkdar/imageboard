@@ -23,20 +23,7 @@ pub async fn save_file(data: web::Data<Mutex<DB>>,mut parts: awmp::Parts) -> Htt
 }
 
 pub fn upload_img() -> HttpResponse {
-    let html = r#"<html>
-        <head><title>Upload Test</title></head>
-        <body><center>
-            <form target="/upload" method="post" enctype="multipart/form-data">
-                <label for="title">Picture Title:</label>
-                <input type="text" id="title" name="title"><br><br>
-                <input type="file" id="file" name="file" accept="image/png, image/jpeg">
-                <input type="submit">
-</form>
-            </center>
-        </body>
-    </html>"#;
-
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(html)
+        .body("404")
 }
