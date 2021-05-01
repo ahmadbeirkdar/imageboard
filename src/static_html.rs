@@ -26,6 +26,8 @@ pub static IMAGE_VIEW_HEAD: &str = r#"<head><title>Image</title></head>
         <body>
           <center>
             <h1>{Title}</h1>
+            Image Labels: {img_lables}
+            <br><br>
             <img src="{img}" alt="Snow">
             <!-- Comments here -->
             <div>

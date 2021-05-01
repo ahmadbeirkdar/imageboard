@@ -13,8 +13,9 @@ pub async fn image_view(data: web::Data<Mutex<DB>>,web::Path(id): web::Path<Stri
         None => {HttpResponse::Ok().content_type("text/html; charset=utf-8").body("404")}
         Some(doc) => {
             let title = doc.get("title").unwrap().as_str().unwrap();
+            let img_lables = doc.get("labels").unwrap().as_array().unwrap().into_iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>().join(", ");
             let img = format!("/get_img/{}",id);
-            let head = static_html::IMAGE_VIEW_HEAD.replace("{Title}",title).replace("{img}",&img);
+            let head = static_html::IMAGE_VIEW_HEAD.replace("{Title}",title).replace("{img}",&img).replace("{img_lables}",&img_lables);
             let comments_docs = doc.get("comments").unwrap().as_array().unwrap();
             let mut comments: Vec<String> = vec!();
             for i in comments_docs {
