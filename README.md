@@ -1,11 +1,16 @@
 # imageboard
-Imageboard - Rust backend
+Imageboard - Rust backend(Actix)
 
 ## Showcase Video:
 
 [![](http://img.youtube.com/vi/CcgPEFh49TA/0.jpg)](http://www.youtube.com/watch?v=CcgPEFh49TA "")
 
 http://www.youtube.com/watch?v=CcgPEFh49TA
+
+## Features:
+* Upload Images
+* Each image is labeled with its contents and objects using Google's Vision API
+* Anonymous comments on each image
 
 ### How to use:
 1. Install Rust, check out - https://www.rust-lang.org/tools/install
