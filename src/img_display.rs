@@ -47,4 +47,3 @@ pub async fn show_img(data: web::Data<Mutex<DB>>, web::Path(id): web::Path<Strin
         }
     }
 }
-

@@ -47,7 +47,13 @@ pub async fn handle_image_upload(mut data: web::Data<Mutex<DB>>, file_data: awmp
     let oid = data.lock().unwrap().new_image(&doc);
     println!("{:#?}", filepath);
 
-    let img_labels: Vec<String> = label_image(&filepath);
+    // Label image
+    let mv_filepath = filepath.clone();
+    let child = thread::spawn(move ||  {
+        let img_labels: Vec<String> = label_image(&mv_filepath);
+        data.lock().unwrap().update_label(oid,img_labels);
+    });
+
 
     Ok(filepath)
 }

@@ -53,22 +53,15 @@ impl DB {
         let new_doc = doc! {
             "title": doc.get("title").unwrap().as_str().unwrap(),
             "img_path": doc.get("img_path").unwrap().as_str().unwrap(),
-            "comments": doc.get("comments").unwrap().as_document().unwrap(),
+            "comments": doc.get("comments").unwrap().as_array().unwrap(),
             "labels": labels,
         };
         self.img_data.insert(id.clone(),new_doc.clone());
-        self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap()},new_doc,None);
+        self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()},new_doc,None);
     }
 
     pub fn get_image(&mut self, id : &str) -> Option<Document>{
-        match self.img_data.get(id) {
-            None => {
-                self.coll.find_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()}, None).unwrap()
-            }
-            Some(doc) => {
-                Some(doc.clone())
-            }
-        }
+        self.coll.find_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()}, None).unwrap()
     }
 
 }
