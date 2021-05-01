@@ -53,6 +53,80 @@ pub static IMAGE_VIEW_FOOT: &str = r#"</div>
         </body>
 </html>"#;
 
+pub static IMAGE_INDEX_VIEW: &str = r#"<html>
+<style>
+* {
+   box-sizing: border-box;
+}
+h1 {
+   text-align: center;
+}
+.outer-grid {
+   display: flex;
+  justify-content: center;
+   flex-wrap: wrap;
+   padding: 0 4px;
+}
+.inner-grid {
+   flex: 25%;
+   max-width: 25%;
+   padding: 0 4px;
+}
+.inner-grid img {
+   margin-top: 8px;
+   width: 100%;
+   padding: 10px;
+}
+@media screen and (max-width: 800px) {
+   .inner-grid {
+      flex: 50%;
+      max-width: 50%;
+   }
+}
+@media screen and (max-width: 600px) {
+   .inner-grid {
+      flex: 100%;
+      max-width: 100%;
+   }
+}
+</style>
+<body>
+<h1>Ahmad's Image Board</h1>
+<center>
+<hr>
+<br>
+<h3>Upload</h3>
+<form target="/upload" method="post" enctype="multipart/form-data">
+                <label for="title">Picture Title:</label>
+                <input type="text" id="title" name="title"required><br><br>
+                <input type="file" name="file" accept="image/png, image/jpeg" required/>
+                <button type="submit">Submit</button>
+</form>
+<br>
+<hr>
+<form target="/" method="post">
+        <label for="title">Search:</label>
+        <input type="text" id="text" name="text" required>
+        <button type="submit">Submit</button>
+</form>
+</center>
+<div class="outer-grid">
+<div class="inner-grid">
+{grid1}
+</div>
+<div class="inner-grid">
+{grid2}
+</div>
+<div class="inner-grid">
+{grid3}
+</div>
+</div>
+</body>
+</html>"#;
+
 pub fn get_comment(author: &str,date: &str, text: &str) -> String {
     format!("<div class='comment text-justify float-left'><h4>{}</h4> <span>- {} </span> <br><p>{}</p></div><br/>",author,date,text)
+}
+pub fn get_img_div(title: &str, id: &str) -> String {
+    format!("<a href='/img/{}'><img src='/get_img/{}'/><figcaption><center>{}</center></figcaption></a>",id,id,title)
 }

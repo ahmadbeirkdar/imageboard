@@ -22,6 +22,8 @@ async fn main() -> std::io::Result<()> {
             )
             .route("/img/{id}",web::get().to(img_display::image_view))
             .route("/comment/{id}",web::post().to(img_display::new_comment))
+            .route("/",web::get().to(img_display::index))
+            .route("/",web::post().to(img_display::search))
             .service(img_display::show_img)
 
 

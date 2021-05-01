@@ -4,6 +4,9 @@ use crate::DB::DB;
 use std::sync::Mutex;
 use serde::Deserialize;
 use chrono;
+use bson::Document;
+use std::collections::HashMap;
+
 #[path = "static_html.rs"] mod static_html;
 
 
@@ -73,9 +76,57 @@ pub struct FormData {
     comment: String,
 }
 
+#[derive(Deserialize)]
+pub struct SearchFormData {
+    text: String,
+}
+
 pub async fn new_comment(data: web::Data<Mutex<DB>>,web::Path(id): web::Path<String>,form: web::Form<FormData>) -> HttpResponse {
     data.lock().unwrap().insert_comment(&id,&form.name,&form.comment,&chrono::offset::Local::now().date().to_string()).unwrap();
     HttpResponse::Found()
         .header("Location", format!("/img/{}",id))
         .finish()
+}
+fn get_index(img_data: &HashMap<String,Document>) -> String {
+    let get_title = | x: Document | -> String {x.get("title").unwrap().as_str().unwrap().to_string()};
+
+    let grid1 : String = img_data.clone().into_iter().step_by(3).map(|x| static_html::get_img_div(&get_title(x.1),&x.0) ).collect();
+    let grid2 : String = img_data.clone().into_iter().skip(1).step_by(3).map(|x| static_html::get_img_div(&get_title(x.1),&x.0) ).collect();
+    let grid3 : String = img_data.clone().into_iter().skip(2).step_by(3).map(|x| static_html::get_img_div(&get_title(x.1),&x.0) ).collect();
+
+    static_html::IMAGE_INDEX_VIEW.replace("{grid1}",&grid1).replace("{grid2}",&grid2).replace("{grid3}",&grid3)
+}
+
+pub async fn index(data: web::Data<Mutex<DB>>) -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body(get_index(&data.lock().unwrap().populate()))
+}
+
+pub async fn search(data: web::Data<Mutex<DB>>,form: web::Form<SearchFormData>) -> HttpResponse {
+    let check_txt = | doc_txt : &str, txt: &str | -> bool {
+        doc_txt.clone()
+            .to_ascii_lowercase()
+            .contains(&txt.clone().to_ascii_lowercase())
+    };
+    let check_labels = | doc: &Document, txt: &str | -> bool {
+      doc.get("labels")
+          .unwrap().as_array().unwrap()
+          .into_iter()
+          .any(|x| check_txt(x.as_str().unwrap(),txt))
+    };
+    let check_title = | doc: &Document, txt: &str | -> bool {
+        check_txt(doc.get("title").unwrap().as_str().unwrap(),txt)
+    };
+
+    let img_data : HashMap<String,Document> = data.lock()
+                                                    .unwrap().populate()
+                                                    .into_iter()
+                                                    .filter(|x| (check_title(&x.1,&form.text) || check_labels(&x.1,&form.text)))
+                                                    .collect();
+
+
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body(get_index(&img_data))
 }
