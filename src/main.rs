@@ -2,7 +2,7 @@ mod img_utls;
 mod img_upload_handlers;
 mod DB;
 mod secret;
-
+mod img_display;
 use actix_multipart::Multipart;
 use actix_web::{middleware, web, App, Error, HttpResponse, HttpServer};
 use std::sync::Mutex;
@@ -18,7 +18,7 @@ async fn main() -> std::io::Result<()> {
             web::resource("/upload")
                 .route(web::get().to(img_upload_handlers::upload_img))
                 .route(web::post().to(img_upload_handlers::save_file)),
-        )
+        ).service(img_display::image_view).service(img_display::show_img)
     })
         .bind(ip)?
         .run()
