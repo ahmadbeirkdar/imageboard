@@ -25,7 +25,8 @@ pub static IMAGE_VIEW_HEAD: &str = r#"<head><title>Image</title></head>
 </style>
         <body>
           <center>
-            <h1>{Title}</h1>
+          <h1><a href='/'>Ahmad's Image Board</a></h1>
+            <h2>{Title}</h2>
             Image Labels: {img_lables}
             <br><br>
             <img src="{img}" alt="Snow">
@@ -96,15 +97,15 @@ h1 {
 <hr>
 <br>
 <h3>Upload</h3>
-<form target="/upload" method="post" enctype="multipart/form-data">
+<form action="/upload" method="post" enctype="multipart/form-data">
                 <label for="title">Picture Title:</label>
-                <input type="text" id="title" name="title"required><br><br>
-                <input type="file" name="file" accept="image/png, image/jpeg" required/>
-                <button type="submit">Submit</button>
+                <input type="text" id="title" name="title" required><br><br>
+                <input type="file" id="file" name="file" accept="image/png, image/jpeg" required>
+                <input type="submit">
 </form>
 <br>
 <hr>
-<form target="/" method="post">
+<form target="/" method="post" target="_self">
         <label for="title">Search:</label>
         <input type="text" id="text" name="text" required>
         <button type="submit">Submit</button>
