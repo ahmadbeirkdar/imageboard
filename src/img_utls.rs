@@ -1,13 +1,9 @@
 use std::process::Command;
 use rand::{distributions::Alphanumeric, Rng};
 use mongodb::{
-    bson::{doc, Bson},
-    sync::Client,
+    bson::{doc},
 };
-use std::io::Write;
-use actix_multipart::{Multipart, Field};
 use actix_web::{web, Error};
-use futures::{StreamExt, TryStreamExt};
 use crate::DB::DB;
 use std::sync::Mutex;
 use std::thread;
@@ -27,7 +23,7 @@ pub fn label_image(img_path: &str) -> Vec<String> {
     return vec!();
 }
 
-pub async fn handle_image_upload(mut data: web::Data<Mutex<DB>>, file_data: awmp::File, title: String) -> Result<String, Error> {
+pub async fn handle_image_upload(data: web::Data<Mutex<DB>>, file_data: awmp::File, title: String) -> Result<String, Error> {
     let random_bytes: String = rand::thread_rng()
         .sample_iter(&Alphanumeric)
         .take(16)
@@ -50,9 +46,10 @@ pub async fn handle_image_upload(mut data: web::Data<Mutex<DB>>, file_data: awmp
     // Label image
     let mv_filepath = filepath.clone();
     let mv_oid = oid.clone();
+    #[allow(unused_variables)]
     let child = thread::spawn(move ||  {
         let img_labels: Vec<String> = label_image(&mv_filepath);
-        data.lock().unwrap().update_label(mv_oid,img_labels);
+        data.lock().unwrap().update_label(mv_oid,img_labels).unwrap();
     });
 
 

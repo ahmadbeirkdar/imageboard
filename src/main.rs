@@ -1,10 +1,10 @@
+#![allow(non_snake_case)]
 mod img_utls;
 mod img_upload_handlers;
 mod DB;
 mod secret;
 mod img_display;
-use actix_multipart::Multipart;
-use actix_web::{middleware, web, App, Error, HttpResponse, HttpServer};
+use actix_web::{middleware, web, App, HttpServer};
 use std::sync::Mutex;
 
 #[actix_web::main]

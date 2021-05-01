@@ -1,13 +1,9 @@
-use mongodb::{sync::{Client, Collection, Database}};
-use bson::{Document, Bson};
+use mongodb::{sync::{Client, Collection, Database}, error::Error};
+use bson::{Document};
 use std::collections::HashMap;
-use futures::StreamExt;
 use bson::doc;
 use bson::bson;
-use std::convert::TryInto;
-use std::collections::hash_map::RandomState;
-use bson::oid::ObjectId;
-use std::borrow::Borrow;
+use mongodb::results::UpdateResult;
 
 pub struct DB {
     client: Client,
@@ -29,6 +25,7 @@ impl DB {
                 Ok(document) => {
                     img_data.insert(document.get("_id").unwrap().as_object_id().unwrap().to_hex(), document);
                 }
+                #[allow(unused_variables)]
                 Err(e) => {},
             }
         }
@@ -45,11 +42,10 @@ impl DB {
     pub fn new_image(&mut self, doc: &bson::Document) -> String {
         let id : String = self.coll.insert_one(doc.clone(), None).unwrap().inserted_id.as_object_id().unwrap().to_hex();
         self.img_data.insert(id.clone(),doc.clone());
-        println!("{:?}",self.img_data);
         id.clone()
     }
 
-    pub fn update_label(&mut self, id : String, labels : Vec<String>) {
+    pub fn update_label(&mut self, id : String, labels : Vec<String>) -> Result<UpdateResult, Error>{
         let doc = self.img_data.remove(&id).unwrap();
         let new_doc = doc! {
             "title": doc.get("title").unwrap().as_str().unwrap(),
@@ -58,15 +54,15 @@ impl DB {
             "labels": labels,
         };
         self.img_data.insert(id.clone(),new_doc.clone());
-        self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()},new_doc,None);
+        self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()},new_doc,None)
     }
 
     pub fn get_image(&self, id : &str) -> Option<Document>{
         self.coll.find_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()}, None).unwrap()
     }
 
-    pub fn insert_comment(&self, id: &str, author: &str, text: &str, date: &str){
-        let mut old_doc = self.get_image(id).unwrap();
+    pub fn insert_comment(&self, id: &str, author: &str, text: &str, date: &str) -> Result<UpdateResult, Error>{
+        let old_doc = self.get_image(id).unwrap();
         let mut arr = old_doc.get("comments").unwrap().as_array().unwrap().clone();
         arr.push(
             bson! ({
@@ -82,8 +78,7 @@ impl DB {
             "comments": arr,
             "labels": old_doc.get("labels").unwrap().as_array().unwrap(),
         };
-
-        self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()},new_doc,None);
+        self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()},new_doc,None)
     }
 
 }
