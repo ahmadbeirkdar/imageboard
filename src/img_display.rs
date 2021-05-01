@@ -1,12 +1,13 @@
-use actix_web::{get, web, App, HttpServer, Responder, HttpResponse,Result,Error};
+use actix_web::{get,post, web, App, HttpServer, Responder, HttpResponse,Result,Error};
 use actix_files::NamedFile;
 use crate::DB::DB;
 use std::sync::Mutex;
 use bson::{Document, Array};
+use serde::Deserialize;
+use chrono;
 #[path = "static_html.rs"] mod static_html;
 
 
-#[get("/img/{id}")]
 pub async fn image_view(data: web::Data<Mutex<DB>>,web::Path(id): web::Path<String>) -> HttpResponse {
 
     match data.lock().unwrap().get_image(&id) {
@@ -20,7 +21,7 @@ pub async fn image_view(data: web::Data<Mutex<DB>>,web::Path(id): web::Path<Stri
                 img_lables = "In progres...".to_string();
             }
             let head = static_html::IMAGE_VIEW_HEAD.replace("{Title}",title).replace("{img}",&img).replace("{img_lables}",&img_lables);
-
+            let footer = static_html::IMAGE_VIEW_FOOT.replace("{oid}",&id);
             let comments_docs = doc.get("comments").unwrap().as_array().unwrap();
             let mut comments: Vec<String> = vec!();
             for i in comments_docs {
@@ -36,7 +37,7 @@ pub async fn image_view(data: web::Data<Mutex<DB>>,web::Path(id): web::Path<Stri
 
             HttpResponse::Ok()
                 .content_type("text/html; charset=utf-8")
-                .body(format!("{}{}{}",head,comments.into_iter().collect::<String>(),static_html::IMAGE_VIEW_FOOT))
+                .body(format!("{}{}{}",head,comments.into_iter().collect::<String>(),footer))
         }
     }
 
@@ -52,4 +53,18 @@ pub async fn show_img(data: web::Data<Mutex<DB>>, web::Path(id): web::Path<Strin
             NamedFile::open(doc.get("img_path").unwrap().as_str().unwrap()).unwrap()
         }
     }
+}
+
+
+#[derive(Deserialize)]
+pub struct FormData {
+    name: String,
+    comment: String,
+}
+
+pub async fn new_comment(data: web::Data<Mutex<DB>>,web::Path(id): web::Path<String>,form: web::Form<FormData>) -> HttpResponse {
+    data.lock().unwrap().insert_comment(&id,&form.name,&form.comment,&chrono::offset::Local::now().date().to_string());
+    HttpResponse::Found()
+        .header("Location", format!("/img/{}",id))
+        .finish()
 }

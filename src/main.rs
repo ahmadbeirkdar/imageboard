@@ -14,11 +14,17 @@ async fn main() -> std::io::Result<()> {
     let ip = "0.0.0.0:3000";
 
     HttpServer::new(|| {
-        App::new().wrap(middleware::Logger::default()).data(Mutex::new(DB::DB::init(secret::DB_S))).service(
+        App::new().wrap(middleware::Logger::default()).data(Mutex::new(DB::DB::init(secret::DB_S)))
+            .service(
             web::resource("/upload")
                 .route(web::get().to(img_upload_handlers::upload_img))
                 .route(web::post().to(img_upload_handlers::save_file)),
-        ).service(img_display::image_view).service(img_display::show_img)
+            )
+            .route("/img/{id}",web::get().to(img_display::image_view))
+            .route("/comment/{id}",web::post().to(img_display::new_comment))
+            .service(img_display::show_img)
+
+
     })
         .bind(ip)?
         .run()

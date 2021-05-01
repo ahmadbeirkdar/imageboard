@@ -3,6 +3,7 @@ use bson::{Document, Bson};
 use std::collections::HashMap;
 use futures::StreamExt;
 use bson::doc;
+use bson::bson;
 use std::convert::TryInto;
 use std::collections::hash_map::RandomState;
 use bson::oid::ObjectId;
@@ -60,8 +61,29 @@ impl DB {
         self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()},new_doc,None);
     }
 
-    pub fn get_image(&mut self, id : &str) -> Option<Document>{
+    pub fn get_image(&self, id : &str) -> Option<Document>{
         self.coll.find_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()}, None).unwrap()
+    }
+
+    pub fn insert_comment(&self, id: &str, author: &str, text: &str, date: &str){
+        let mut old_doc = self.get_image(id).unwrap();
+        let mut arr = old_doc.get("comments").unwrap().as_array().unwrap().clone();
+        arr.push(
+            bson! ({
+                "author" : author,
+                "text" : text,
+                "date" : date,
+            })
+        );
+
+        let new_doc = doc! {
+            "title": old_doc.get("title").unwrap().as_str().unwrap(),
+            "img_path": old_doc.get("img_path").unwrap().as_str().unwrap(),
+            "comments": arr,
+            "labels": old_doc.get("labels").unwrap().as_array().unwrap(),
+        };
+
+        self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()},new_doc,None);
     }
 
 }

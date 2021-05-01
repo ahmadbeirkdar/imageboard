@@ -42,17 +42,17 @@ pub static IMAGE_VIEW_FOOT: &str = r#"</div>
             </div>
             <!-- Form Here -->
               <br><br><br>
-            <form target="/comment" method="post" enctype="multipart/form-data">
+            <form action="/comment/{oid}" method="post">
                 <label for="name">Name:</label>
-                <input type="text" id="name" name="name"><br><br>
+                <input type="text" id="name" name="name" required><br><br>
                 <label for="name">Comment:</label><br/>
-                <textarea id="comment" name="comment" rows="4" cols="50"></textarea><br/>
-                <button type="submit">Submit</button>
+                <textarea id="comment" name="comment" rows="4" cols="50" required></textarea><br/>
+                <input type="submit" value="Submit">
             </form>
           </center>
         </body>
 </html>"#;
 
 pub fn get_comment(author: &str,date: &str, text: &str) -> String {
-    format!("<div class='comment text-justify float-left'><h4>{}</h4> <span> {} </span> <br><p>{}</p></div><br/>",author,date,text)
+    format!("<div class='comment text-justify float-left'><h4>{}</h4> <span>- {} </span> <br><p>{}</p></div><br/>",author,date,text)
 }
