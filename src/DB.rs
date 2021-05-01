@@ -44,6 +44,7 @@ impl DB {
     pub fn new_image(&mut self, doc: &bson::Document) -> String {
         let id : String = self.coll.insert_one(doc.clone(), None).unwrap().inserted_id.as_object_id().unwrap().to_hex();
         self.img_data.insert(id.clone(),doc.clone());
+        println!("{:?}",self.img_data);
         id.clone()
     }
 
@@ -59,8 +60,15 @@ impl DB {
         self.coll.update_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap()},new_doc,None);
     }
 
-    pub fn get_image(&self, id : &str) -> Option<&Document>{
-        self.img_data.get(id)
+    pub fn get_image(&mut self, id : &str) -> Option<Document>{
+        match self.img_data.get(id) {
+            None => {
+                self.coll.find_one(doc! {"_id": bson::oid::ObjectId::with_string(&id).unwrap_or_default()}, None).unwrap()
+            }
+            Some(doc) => {
+                Some(doc.clone())
+            }
+        }
     }
 
 }

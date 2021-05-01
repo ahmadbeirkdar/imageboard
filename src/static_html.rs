@@ -30,7 +30,9 @@ pub static IMAGE_VIEW_HEAD: &str = r#"<head><title>Image</title></head>
             <!-- Comments here -->
             <div>
                 <div class="container">
-                    <div class="row">"#;
+                    <div class="row">
+                        <h1>Comments</h1>
+                    "#;
 
 
 pub static IMAGE_VIEW_FOOT: &str = r#"</div>
@@ -48,3 +50,7 @@ pub static IMAGE_VIEW_FOOT: &str = r#"</div>
           </center>
         </body>
 </html>"#;
+
+pub fn get_comment(author: &str,date: &str, text: &str) -> String {
+    format!("<div class='comment text-justify float-left'><h4>{}</h4> <span> {} </span> <br><p>{}</p></div><br/>",author,date,text)
+}
